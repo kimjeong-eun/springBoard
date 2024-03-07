@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mydatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+  
+
+  <mapper namespace="org.zerock.mapper.BoardMapper">
+  
+  <resultMap type="org.zerock.domain.BoardVO" id="mapping_list" >
+  	<result property="bno" column="bno"/>
+	<result property="title" column="title"/>
+  	<result property="content" column="content"/>
+  	<result property="writer" column="writer"/>
+  	<result property="regidate" column="regidate"/>
+  	<result property="updatedate" column="updatedate"/>
+  </resultMap>
+  
+ <!--전체 게시물 가져옴  -->
+<!--   <select id="getList" resultType="org.zerock.domain.BoardVO">
+  <![CDATA[
+  select * from tbl_board where bno>0
+  ]]>  
+  </select>  -->
+  
+   <!--[CDATA[]] 는 부등호를 사용하기 위해 사용  -->
+   <!--페이징 처리 추가  -->
+  <select id="getList" resultMap="mapping_list">
+  <![CDATA[
+  select * from tbl_board where bno>0
+  ]]>  
+  </select> 
+ 
+ <sql id="criteria">
+ 	<trim prefix="(" suffix=") AND" prefixOverrides="OR">
+ 		<foreach collection="typeArr" item="type"> <!-- Criteria의 getTypeArr()메서드가 대상이다.  myBatis는 엄격하게 자바 빈즈 규칙을 따르지 않고 get/set메서드만 활용함-->
+ 			<trim prefix="OR">
+ 				<choose>
+ 					<when test="type == 'T'.toString()">
+ 						title like '%'||#{keyword}||'%'
+ 					</when>
+ 					<when test="type == 'C'.toString()">
+ 						content like '%'||#{keyword}||'%'
+ 					</when>
+ 					<when test="type == 'W'.toString()">
+ 						writer like '%'||#{keyword}||'%'
+ 					</when>
+ 				</choose>
+ 			</trim>
+ 		</foreach>	
+ 	</trim> 
+ </sql>
+ 
+ <select id="getListWithPaging" resultMap="mapping_list">
+ 
+ 	<![CDATA[
+ 	
+ 	select bno ,title , content, writer, regidate, updatedate
+ 	
+ 	from(
+ 	
+ 	select /*+ INDEX_DESC(tbl_board pk_board) */ rownum rn , bno, title, content , writer,
+ 				 regidate, updatedate 
+ 		from tbl_board 		 					 
+ 	 where 	
+ 	]]>
+ 	
+ 	<include refid="criteria"></include>
+ 	<![CDATA[
+ 		rownum <= #{pageNum} *  #{amount}
+ 		)
+ 	where rn > (#{pageNum} -1 ) * #{amount}
+ 	]]>	
+ </select>
+ 
+  <!-- 이너셀렉트: pageNum * amount 이하인 값을 pk기준으로 내림차순으로 가져옴 -->
+  <!--아우터 셀렉트에서는  (#{pageNum} -1) * #{amount} 값을 가져온다.-->
+
+ <!-- 삽입용 코드 (삽입 시 번호가 생성된다) -->
+ <insert id="insert">
+  insert into tbl_board (bno,title,content,writer) values (seq_board.nextval , #{title} , #{content} , #{writer})
+ </insert>
+ 
+ <insert id="insertSelectKey"> <!-- 자동 키를 생성하고 insert처리  -->
+ 	<selectKey keyProperty="bno" order="BEFORE" resultType="long">
+ 		select seq_board.nextval from dual
+ 	</selectKey>
+   insert into tbl_board (bno,title,content,writer) values (#{bno} , #{title} , #{content} , #{writer}) <!-- before에서 만든 bno를 활용 -->
+ </insert>
+
+ <select id="read" resultMap="mapping_list">
+ 
+ 	select * from tbl_board where bno = #{bno}
+ 	
+ </select>
+
+ <delete id="delete">
+ 
+ 	delete from tbl_board where bno = #{bno}
+ 
+ </delete>
+ 
+ <update id="update"> <!--파라미터 객체로 넘어옴  -->
+ 
+	update tbl_board set title = #{title} , content = #{content} , writer = #{writer}, updateDate = sysdate where bno = #{bno}
+	
+ </update>
+ 
+ <select id="getTotalCount" resultType="int">
+ 
+ 	select count(*) from tbl_board where
+ 	
+ 	<include refid="criteria"></include>
+ 	
+ 	 bno > 0
+ </select>
+ 
+ </mapper>
