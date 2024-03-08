@@ -210,8 +210,7 @@
         	      if(prev){
         	        str+= "<li class='page-item'><a class='page-link' href='"+(startNum -1)+"'>Previous</a></li>";
         	      }
-        	      
-        	       
+
         	      
         	      for(var i = startNum ; i <= endNum; i++){
         	        
@@ -230,6 +229,7 @@
         	      
         	      replyPageFooter.html(str);
         	    }
+        	    
         	    
         	    replyPageFooter.on("click","li a",function(e){
         	    	

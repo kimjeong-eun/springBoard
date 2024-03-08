@@ -137,7 +137,7 @@
 		    <version>1.16</version>
 		</dependency>
 		
-		<!-- AspectJ -->
+		<!-- AspectJ --> 
 		<dependency>
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjrt</artifactId>
@@ -145,11 +145,19 @@
 		</dependency>	
 		
 		<!-- https://mvnrepository.com/artifact/org.aspectj/aspectjweaver -->
-		<dependency>
+		<dependency> <!-- AOP설정에서 중요한 라이브러리 ~-->
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjweaver</artifactId>
 			<version>${org.aspectj-version}</version>
 		</dependency> <!-- AOP 관련 설정 추가(객체용)-->
+
+		<!-- 썸네일용-->
+		<!-- https://mvnrepository.com/artifact/net.coobird/thumbnailator -->
+		<dependency>
+		    <groupId>net.coobird</groupId>
+		    <artifactId>thumbnailator</artifactId>
+		    <version>0.4.8</version>
+		</dependency>
 
 		<!-- Logging : log4j는 취약점 발견으로 사용 안함
 		<dependency>

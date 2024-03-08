@@ -2,6 +2,7 @@ package org.zerock.mapper;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.zerock.domain.BoardVO;
 import org.zerock.domain.Criteria;
@@ -22,6 +23,7 @@ public interface BoardMapper { //마이바티스를 이용하여 sql처리함
 	
 	public int getTotalCount(Criteria cri); //토탈 게시물을 구함
 	
+	public void updateReplyCnt(@Param("bno") Long bno , @Param("amount") int amount);
 	
 	
 }

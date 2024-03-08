@@ -75,7 +75,6 @@ public class ReplyController {
 		return service.remove(rno)==1
 				? new ResponseEntity<>("success",HttpStatus.OK) //body에 success담음 
 				: new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-
 	}
 	
 	@RequestMapping(method = {RequestMethod.PUT , RequestMethod.PATCH},
