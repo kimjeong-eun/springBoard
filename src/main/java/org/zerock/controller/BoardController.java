@@ -1,5 +1,12 @@
 package org.zerock.controller;
 
+import java.util.List;
+
+import javax.print.attribute.standard.MediaTray;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,7 +14,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.zerock.domain.BoardAttachVO;
 import org.zerock.domain.BoardVO;
 import org.zerock.domain.Criteria;
 import org.zerock.domain.PageDTO;
@@ -49,7 +58,15 @@ public class BoardController {
 	public String register(@ModelAttribute BoardVO board , RedirectAttributes rttr) {
 		// RedirectAttributes rttr 1회용으로 값 저장용
 		// BoardVO board : form에서 넘어온 객체
+		log.info("-------------------");
 		log.info("register 컨트롤러 메서드 실행..." + board);
+		
+		
+		if(board.getAttachList()!= null) {
+			board.getAttachList().forEach( attach -> log.info(attach));
+		}
+		
+		log.info("-------------------");
 		service.register(board); // 서비스 계층을 통해서 매퍼로 값이 전달
 		
 		rttr.addFlashAttribute("result", board.getBno()); //1회용 값으로 jsp에게 전달
@@ -108,4 +125,19 @@ public class BoardController {
 		
 		return "redirect:/board/list" +cri.getListLink();
 	}
+	
+	@GetMapping(value = "/getAttachList" , produces = MediaType.APPLICATION_JSON_VALUE )
+	@ResponseBody
+	public ResponseEntity<List<BoardAttachVO>> getAttachList(Long bno){
+	
+		log.info("getAttachList" + bno);
+		
+		return new ResponseEntity<List<BoardAttachVO>>(service.getAttachList(bno),HttpStatus.OK);
+		
+		
+	}
+	
+	
+	
+	
 }

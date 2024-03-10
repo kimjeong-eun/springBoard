@@ -61,35 +61,31 @@ create table tbl_reply(
  	
  	select * from TBL_REPLY;
  	
+ 	---보드 테이블에 댓글 정보 추가
+ 	alter table tbl_board add (replycnt number default 0);
+ 	update tbl_board set replycnt = (select count(rno) from tbl_reply where TBL_REPLY.bno = tbl_board.bno);
+ 	
  	
  	
 ----인덱스 생성
 
  create index idx_reply on tbl_reply(bno desc, rno asc);
  	
- 
- ---댓글과 댓글수에 대한 처리
- 
+-------파일첨부 테이블
 
- alter table tbl_board add (replycnt number default 0);
- 
- 
- update tbl_board set replycnt = (select count(rno) from tbl_reply where tbl_reply.bno = tbl_board.bno);
- 	
-----첨부파일을 위한 준비
 
- create table tbl_attach(
- 
- 	uuid varchar2(100) not null,
- 	uploadPath varchar2(200) not null,
- 	fileName varchar2(100) not null,
- 	filetype char(1) default 'I',
- 	bno number(10,0)
- 	
- );
- 
- alter table tbl_attach add constraint pk_attach primary key(uuid);
- 
- alter table tbl_attach add constraint fk_attach foreign key(bno) references tbl_board(bno);
- 
- 
+create table tbl_attach ( 
+  uuid varchar2(100) not null,
+  uploadPath varchar2(200) not null,
+  fileName varchar2(100) not null, 
+  filetype char(1) default 'I',
+  bno number(10,0)
+);
+
+alter table tbl_attach add constraint pk_attach primary key (uuid); 
+
+alter table tbl_attach add constraint fk_board_attach foreign key (bno) references tbl_board(bno);
+
+
+
+select * from tbl_attach;

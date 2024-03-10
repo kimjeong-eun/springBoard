@@ -53,8 +53,7 @@
 				
 			});
 	}
-	
-	
+
 	//삭제 메서드
 	
 	function remove(rno , callback , error){

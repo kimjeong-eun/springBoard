@@ -3,6 +3,7 @@ package org.zerock.service;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
+import org.zerock.domain.BoardAttachVO;
 import org.zerock.domain.BoardVO;
 import org.zerock.domain.Criteria;
 
@@ -24,5 +25,7 @@ public interface BoardService {
 	public List<BoardVO> getList(Criteria cri) ; //페이징 조건 추가
 	
 	public int getTotal(Criteria cri);
+
+	public List<BoardAttachVO> getAttachList(Long bno);
 	
 }
