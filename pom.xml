@@ -318,7 +318,13 @@
                     <mainClass>org.test.int1.Main</mainClass>
                 </configuration>
             </plugin>
-                 <!--첫줄 오류 해결 -->		
+         
+                      <!--첫줄 오류 해결 -->
+			<plugin> <!-- 메이븐 첫줄에러 -->
+				  <groupId>org.apache.maven.plugins</groupId>
+				  <artifactId>maven-war-plugin</artifactId>
+				  <version>3.3.2</version>
+			</plugin>
 				
         </plugins>
     </build>
