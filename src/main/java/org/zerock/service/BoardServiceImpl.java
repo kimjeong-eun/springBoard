@@ -56,19 +56,42 @@ public class BoardServiceImpl implements BoardService{
 		
 		return mapper.read(bno); //매퍼에 있는 read메서드를 실행하면 bno로 객체를 찾아온다.
 	}
-
+	
+	
+	@Transactional
 	@Override
 	public boolean modify(BoardVO board) {
 		// 파라미터로 객체를 받아 수정을 진행한다..
 		
 		log.info("modify 메서드 실행중 .......받은 객체 : "+ board);
 		
-		return mapper.update(board) == 1;
+		attachMapper.deleteAll(board.getBno());
+		
+		boolean modifyResult = mapper.update(board) == 1;
+		
+		if(modifyResult && board.getAttachList() != null && board.getAttachList().size()>0) {
+			
+			board.getAttachList().forEach(attach ->{
+				
+				
+				attach.setBno(board.getBno());
+				attachMapper.insert(attach);
+				
+			});
+			
+		}
+
+		return modifyResult;
 	}
 
+	@Transactional
 	@Override
 	public boolean remove(Long bno) {
 		// 파라미터로 bno를 받아 삭제를 진행한다.
+		
+		log.info("remove...." + bno);
+		
+		attachMapper.deleteAll(bno);
 		
 		return mapper.delete(bno)==1;
 	}
@@ -97,6 +120,7 @@ public class BoardServiceImpl implements BoardService{
 
 		return mapper.getTotalCount(cri);
 	}
+	
 	@Override
 	public List<BoardAttachVO> getAttachList(Long bno) {
 		// 

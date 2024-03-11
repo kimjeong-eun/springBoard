@@ -1,7 +1,11 @@
 package org.zerock.controller;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
+import javax.imageio.stream.FileCacheImageInputStream;
 import javax.print.attribute.standard.MediaTray;
 
 import org.springframework.http.HttpStatus;
@@ -92,7 +96,7 @@ public class BoardController {
 	
 	@PostMapping("/modify") //http://localhost/board/modify
 	public String modify(BoardVO board , RedirectAttributes rttr , @ModelAttribute("cri") Criteria cri) {
-		
+						//@modelAttribute 가 알아서 setter로 매칭
 		log.info("modify 컨트롤러 메서드 실행중 ....... " + board);
 		if(service.modify(board)) { //true일 때
 			rttr.addFlashAttribute("result","success");
@@ -113,7 +117,14 @@ public class BoardController {
 	public String remove(@RequestParam("bno") Long bno , RedirectAttributes rttr , @ModelAttribute("cri") Criteria cri ) {
 		
 		log.info("remove 컨트롤러 메서드 실행 중......... 받은 번호는 ? : " + bno);
+		
+		 List<BoardAttachVO> attachList = service.getAttachList(bno);
+		 
 		if(service.remove(bno)) { //삭제가 성공시 true가 넘어옴
+			
+			//첨부 파일 삭제
+			deleteFiles(attachList);
+			
 			rttr.addFlashAttribute("result","success"); // 1회용 값으로 전달됨
 		}
 		/*
@@ -137,7 +148,33 @@ public class BoardController {
 		
 	}
 	
-	
-	
-	
+	//첨부 파일을 삭제하기 위한 메서드
+	private void deleteFiles(List<BoardAttachVO> attachList) {
+		
+		if(attachList == null || attachList.size()==0) {
+			return;
+		}
+		
+		attachList.forEach(attach ->{
+			
+			
+			try {
+				
+				Path file = Paths.get("c:\\upload\\"+attach.getUploadPath()+"\\"+attach.getUuid()+"_"+attach.getFileName());
+				
+				Files.deleteIfExists(file); //파일이 존재한다면 삭제!
+				
+				if(Files.probeContentType(file).startsWith("image")) {
+					
+					Path thumbNail = Paths.get("c:\\upload\\"+attach.getUploadPath()+"\\s_"+attach.getUuid()+"_"+attach.getFileName());
+					Files.delete(thumbNail);
+				}	
+			}catch (Exception e) {
+				// TODO: handle exception
+			}
+			
+		});
+		
+	}
+
 }

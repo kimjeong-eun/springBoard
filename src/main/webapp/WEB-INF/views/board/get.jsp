@@ -101,6 +101,7 @@
                       				
                       					<div class="uploadResult">
                       						<ul>
+                      						<!-- 여기에 첨부파일 목록 보임  -->
                       						</ul>
                       					</div>
                       				</div>
@@ -274,9 +275,7 @@
         			//다운로드 하기
         			self.location = "/download?fileName="+path;      			
         		}
-        		
         	});
-
         	function showImage(fileCallPath){
         		
         		
