@@ -71,24 +71,7 @@ public class FileCheckTask {
 			file.delete();
 			
 		}
-		
-		
-		
-		
-		
-		
-		
-		
-		
+
 	}
-	
-	
-	
-	
-		
-	
-	
-	
-	
-	
+
 }
