@@ -2,6 +2,7 @@
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>   
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 
 <%@ include file="../includes/header.jsp" %> <!-- 외부파일 삽입용 -->
     
@@ -42,15 +43,26 @@
                            		<label >UpdateDate</label><input class="form-control" name="updatedate" value='<fmt:formatDate pattern="yyyy/MM/dd" value="${board.updatedate }"/>' readonly="readonly"/>
                            	</div>	
                            	
-                           	<button  type="submit" data-oper='modify' class="btn btn-default" >수정</button>
-                            <button  type="button" data-oper='remove' class="btn btn-danger" >삭제</button>
+                           	<sec:authentication property="principal" var="pinfo"/>
+                           	
+                           	<sec:authorize access="isAuthenticated()">
+                           	
+                           		<c:if test="${pinfo.username eq board.writer }">
+		                           	<button  type="submit" data-oper='modify' class="btn btn-default" >수정</button>
+		                            <button  type="button" data-oper='remove' class="btn btn-danger" >삭제</button>
+                           		</c:if>
+                           	
+                           	</sec:authorize>
+
                            	<button type="button"  data-oper='list' class="btn btn-info" >글목록</button>
                         
                         	<input type="hidden" name="pageNum" value="<c:out value='${cri.pageNum}'/>"/>
                         	<input type="hidden" name="amount" value="<c:out value='${cri.amount}'/>"/>
                         	<input type="hidden" name="type" value="<c:out value='${cri.type}'/>"/>
                         	<input type="hidden" name="keyword" value="<c:out value='${cri.keyword}'/>"/>
-
+							<!--csrf 토큰 추가  -->
+							<input type="hidden" name="${_csrf.parameterName }" value="${_csrf.token }">
+							
                         </form>
             <!-- 첨부 파일 목록 -->
                       		
@@ -228,6 +240,10 @@
     				
     			}
     			
+
+    			var csrfHeaderName = "${_csrf.headerName}";  //"X-CSRF-TOKEN"
+    			var csrfTokenValue = "${_csrf.token}";		// 
+        		
     			$("input[type='file']").change(function(e){
     				
     				var formData = new FormData(); //가상의 폼데이타
@@ -252,6 +268,9 @@
     					contentType:false, //기본 타입 방지
     					data: formData,
     					type:'POST',
+    					beforeSend: function(xhr){   // 헤더에 csrf 값 추가
+    						xhr.setRequestHeader(csrfHeaderName, csrfTokenValue);
+    					},
     					dataType:'json',
     					success: function(result){
     						console.log(result);

@@ -2,6 +2,7 @@
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>   
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 
 <%@ include file="../includes/header.jsp" %> <!-- 외부파일 삽입용 -->
     
@@ -30,10 +31,13 @@
                            		<label >Text Area</label><textarea class="form-control" rows="3" name="content"></textarea>
                            	</div>
                            	 <div class="form-group">
-                           		<label >Writer</label><input class="form-control" name="writer" >
+                           		<label >Writer</label><input class="form-control" name="writer"  value="<sec:authentication property='principal.username'/>" readonly="readonly">
                            	</div>
                            	<button type="submit" class="btn btn-default">Submit Button</button>
                            	<button type="reset" class="btn btn-default">Reset</button>
+                           	
+                           	<input type="hidden" name="${_csrf.parameterName }" value="${_csrf.token }"/>
+                           	
                            </form>
                          </div>
                             <!-- /.table-responsive -->
@@ -133,6 +137,11 @@
 				
 			}
 			
+			/* csrf 토큰 처리  */
+			
+			var csrfHeaderName = "${_csrf.headerName}";  //"X-CSRF-TOKEN"
+			var csrfTokenValue = "${_csrf.token}";		// 
+			
 			$("input[type='file']").change(function(e){
 				
 				var formData = new FormData(); //가상의 폼데이타
@@ -155,6 +164,9 @@
 					url:'/uploadAjaxAction',
 					processData:false, //쿼리스트링 방지
 					contentType:false, //기본 타입 방지
+					beforeSend: function(xhr){   // 헤더에 csrf 값 추가
+						xhr.setRequestHeader(csrfHeaderName, csrfTokenValue);
+					},
 					data: formData,
 					type:'POST',
 					dataType:'json',
@@ -242,6 +254,10 @@
 					
 					url: '/deleteFile',
 					data:{fileName:targetFile , type : type},
+					beforeSend: function(xhr) {
+						
+						xhr.setRequestHeader(csrfHeaderName , csrfTokenValue);
+					},
 					dataType : 'text',
 					type:'POST',
 					 success: function(result){

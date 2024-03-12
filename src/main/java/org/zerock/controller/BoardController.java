@@ -11,6 +11,7 @@ import javax.print.attribute.standard.MediaTray;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,6 +60,7 @@ public class BoardController {
 	} //리턴타입이 void이면 매핑명으로 된 jsp파일을 찾는다. (/WEB-INF/views/board/list.jsp
 	
 	@PostMapping("/register") //http://localhost/board/register
+	@PreAuthorize("isAuthenticated()")
 	public String register(@ModelAttribute BoardVO board , RedirectAttributes rttr) {
 		// RedirectAttributes rttr 1회용으로 값 저장용
 		// BoardVO board : form에서 넘어온 객체
@@ -79,6 +81,7 @@ public class BoardController {
 	}
 
 	@GetMapping("/register")
+	@PreAuthorize("isAuthenticated()") 
 	public void register() {
 		// http://localhost/board/register로 요청 시 register.jsp에게 보냄
 
@@ -94,6 +97,7 @@ public class BoardController {
 		//스프링이 관리하는 모델 영역에 board라는 이름으로 값(BoardVO)을 추가한다.
 	}
 	
+	@PreAuthorize("principal.username == #board.writer")
 	@PostMapping("/modify") //http://localhost/board/modify
 	public String modify(BoardVO board , RedirectAttributes rttr , @ModelAttribute("cri") Criteria cri) {
 						//@modelAttribute 가 알아서 setter로 매칭
@@ -113,8 +117,9 @@ public class BoardController {
 		return "redirect:/board/list" + cri.getListLink(); //처리 후 돌아갈 페이지
 	}
 	
+	@PreAuthorize("principal.username == #writer")
 	@PostMapping("/remove") // http://localhost/board/remove? bno = 2
-	public String remove(@RequestParam("bno") Long bno , RedirectAttributes rttr , @ModelAttribute("cri") Criteria cri ) {
+	public String remove(@RequestParam("bno") Long bno , RedirectAttributes rttr , @ModelAttribute("cri") Criteria cri ,String writer) {
 		
 		log.info("remove 컨트롤러 메서드 실행 중......... 받은 번호는 ? : " + bno);
 		

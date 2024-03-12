@@ -2,6 +2,7 @@
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>   
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 
 <%@ include file="../includes/header.jsp" %> <!-- 외부파일 삽입용 -->
     
@@ -34,7 +35,16 @@
                            	 <div class="form-group">
                            		<label >Writer</label><input class="form-control" name="writer" value="${board.writer }" readonly="readonly"/>
                            	</div>
-                           	<button data-oper='modify' class="btn btn-default" >수정</button>
+                           	
+                           	<sec:authentication property="principal" var="pinfo"/> <!-- 멤버 정보 pinfo에 저장  -->
+                           	
+                           		<sec:authorize access="isAuthenticated()">
+                           			<c:if test="${pinfo.username eq board.writer }">
+                           				
+                           				<button data-oper='modify' class="btn btn-default" >수정</button>
+                           			</c:if>
+                           		</sec:authorize>
+                           		
                            	<button data-oper='list' class="btn btn-info">글목록</button>
                       
                       		<!-- 첨부 파일 목록 -->
@@ -117,7 +127,10 @@
         		<div class="panel panel-default">
         			<div class = "panel-heading">
         				<i class="fa fa-comments fa-fw"></i>Reply
-        				<button id="addReplyBtn" class="btn btn-primary btn-xs pull-right">New Reply</button>
+        				
+        				<sec:authorize access="isAuthenticated()"> <!-- 로그인 한 사용자만 가능 -->
+        						<button id="addReplyBtn" class="btn btn-primary btn-xs pull-right">New Reply</button>
+        				</sec:authorize>
         			</div>
       		
         		<!-- /.panel-heading -->
@@ -417,9 +430,21 @@
 				var modalRemoveBtn = $("#modalRemoveBtn");
 				var modalRegisterBtn = $("#modalRegisterBtn");
 				
+				var replyer = null;
+				
+				<sec:authorize access ="isAuthenticated()"> 
+				
+					replyer = '<sec:authentication property="principal.username"/>';
+				
+				</sec:authorize>
+				
+	 			var csrfHeaderName = "${_csrf.headerName}";  //"X-CSRF-TOKEN"
+    			var csrfTokenValue = "${_csrf.token}";		// 
+				
 				$("#addReplyBtn").on("click",function(e){
 					
 					modal.find("input").val("");
+					modal.find("input[name='replyer']").val(replyer);
 					modalInputReplyDate.closest("div").hide(); 
 					// 등록 날짜 안보이게 비활성화 
 					
@@ -432,6 +457,13 @@
 				});
 				
 				
+    			//Ajax spring 시큐리티 헤더 설정
+    			$(document).ajaxSend(function(e,xhr,options){
+    				//ajax 전송시 같이 전송하도록 세팅
+    				xhr.setRequestHeader(csrfHeaderName , csrfTokenValue);
+    			});
+    			
+    			
 				//새로운 댓글 추가 처리
 				
 				modalRegisterBtn.on("click",function(e){
@@ -481,9 +513,26 @@
 
 				
 				//댓글 수정 / 삭제 처리
+		
 				modalModBtn.on("click",function(e){
 					
-					var reply = {rno:modal.data("rno"),reply:modalInputReply.val()};
+					var originalReplyer = modalInputReplyer.val();
+					
+					var reply = {rno:modal.data("rno"),
+								reply:modalInputReply.val(),
+								replyer:originalReplyer};
+					
+					if(!replyer){
+						alert("로그인후 수정이 가능합니다.");
+						modal.modal("hide");
+						return;
+					}
+					
+					if(replyer != originalReplyer){
+						alert("자신이 등록한 댓글만 수정이 가능합니다.");
+						modal.modal("hide");
+						return;
+					}
 					
 					replyService.update(reply,function(result){
 						
@@ -495,11 +544,25 @@
 					
 				});
 				
+				//댓글 삭제버튼
 				modalRemoveBtn.on("click",function(e){
 					
 					var rno = modal.data("rno");
 					
-					replyService.remove(rno,function(result){
+					if(!replyer){
+						alert("로그인후 삭제가 가능합니다.");
+						modal.modal("hide");
+					}
+					
+					var originalReplyer = modalInputReplyer.val();
+					
+					if(replyer != originalReplyer){
+						alert("자신이 등록한 댓글만 삭제가 가능합니다.");
+						modal.modal("hide");
+						return;
+					}
+					
+					replyService.remove(rno,originalReplyer,function(result){
 						
 						alert(result);
 						modal.modal("hide");

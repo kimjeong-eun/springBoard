@@ -5,8 +5,6 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-
-
 	<bean id="customAccessDenied"
 		class="org.zerock.security.CustomAccessDeniedHandler"></bean>
 
@@ -19,7 +17,7 @@
 	<bean id="customUserDetailsService" class="org.zerock.security.CustomUserDetailsService"></bean>
 	
 	<security:http>
-
+	
 		<security:intercept-url pattern="/sample/all"
 			access="permitAll" />
 
@@ -47,12 +45,8 @@
 
 		<security:logout logout-url="/customLogout"
 			invalidate-session="true" delete-cookies="remember-me,JSESSION_ID" />
-
-
 	</security:http>
-
-
-
+	
 	<!-- <security:authentication-manager> <security:authentication-provider> 
 		<security:user-service> <security:user name="member" password="{noop}member" 
 		authorities="ROLE_MEMBER"/> <security:user name="admin" password="{noop}admin" 
@@ -79,11 +73,10 @@
 		</security:authentication-provider> -->
 		
 		<security:authentication-provider user-service-ref="customUserDetailsService">
-			
+			<!-- user 인터페이스 상속받아 객체 반환 -->
 			<security:password-encoder ref="bcryptPasswordEncoder"/>
 			
 		</security:authentication-provider>
-	
 	</security:authentication-manager>
 
 </beans>

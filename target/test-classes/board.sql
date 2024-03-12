@@ -148,5 +148,20 @@ create table tbl_reply(
  select * from tbl_member_auth;
  select * from tbl_member;
  
+ --- 스프링 시큐리티 로그인 정보 저장 테이블
+ --스프링 시큐리티에서 정해준 테이블 정보임
+ 
+ create table persistent_logins(
+ 	
+ 	username varchar2(64) not null,
+ 	series varchar2(64) primary key,
+ 	token varchar2(64) not null,
+ 	last_used timestamp not null
+ );
+ 
+ 
+ 
+ 
+ 
  
  
