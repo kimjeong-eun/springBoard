@@ -37,8 +37,6 @@ public class FileCheckTask {
 		String str = sdf.format(cal.getTime());
 		
 		return str.replace("-", File.separator);
-		
-		
 	}
 	
 	@Scheduled(cron="0 0 2 * * *")
