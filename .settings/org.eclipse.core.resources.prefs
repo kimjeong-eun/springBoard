@@ -1,4 +1,5 @@
 eclipse.preferences.version=1
+encoding//src/main/java/org/zerock/controller/ReplyController.java=UTF-8
 encoding//src/main/resources/log4j2.xml=UTF-8
 encoding//src/main/resources/log4jdbc.log4j2.properties=UTF-8
 encoding//src/test/resources/log4j2.xml=UTF-8

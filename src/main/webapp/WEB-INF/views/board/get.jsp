@@ -2,6 +2,7 @@
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>   
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 
 <%@ include file="../includes/header.jsp" %> <!-- 외부파일 삽입용 -->
     
@@ -34,8 +35,90 @@
                            	 <div class="form-group">
                            		<label >Writer</label><input class="form-control" name="writer" value="${board.writer }" readonly="readonly"/>
                            	</div>
-                           	<button data-oper='modify' class="btn btn-default" >수정</button>
+                           	
+                           	<sec:authentication property="principal" var="pinfo"/> <!-- 멤버 정보 pinfo에 저장  -->
+                           	
+                           		<sec:authorize access="isAuthenticated()">
+                           			<c:if test="${pinfo.username eq board.writer }">
+                           				
+                           				<button data-oper='modify' class="btn btn-default" >수정</button>
+                           			</c:if>
+                           		</sec:authorize>
+                           		
                            	<button data-oper='list' class="btn btn-info">글목록</button>
+                      
+                      		<!-- 첨부 파일 목록 -->
+                      		
+                      		<div class='bigPictureWrapper'>
+								  <div class='bigPicture'>
+								  </div>
+								</div>
+			
+								<style>
+								.uploadResult {
+								  width:100%;
+								  background-color: gray;
+								}
+								.uploadResult ul{
+								  display:flex;
+								  flex-flow: row;
+								  justify-content: center;
+								  align-items: center;
+								}
+								.uploadResult ul li {
+								  list-style: none;
+								  padding: 10px;
+								  align-content: center;
+								  text-align: center;
+								}
+								.uploadResult ul li img{
+								  width: 100px;
+								}
+								.uploadResult ul li span {
+								  color:white;
+								}
+								.bigPictureWrapper {
+								  position: absolute;
+								  display: none;
+								  justify-content: center;
+								  align-items: center;
+								  top:0%;
+								  width:100%;
+								  height:100%;
+								  background-color: gray; 
+								  z-index: 100;
+								  background:rgba(255,255,255,0.5);
+								}
+								.bigPicture {
+								  position: relative;
+								  display:flex;
+								  justify-content: center;
+								  align-items: center;
+								}
+								
+								.bigPicture img {
+								  width:600px;
+								}
+								
+								</style>
+	                      		
+                      		<div class="row">
+                      			<div class="col-1g-12">
+                      			
+                      				<div class="panel-heading">Files</div>
+                      				
+                      				<div class="panel-body">
+                      				
+                      					<div class="uploadResult">
+                      						<ul>
+                      						<!-- 여기에 첨부파일 목록 보임  -->
+                      						</ul>
+                      					</div>
+                      				</div>
+                      			</div>
+                      		
+                      		</div> <!-- 첨부 파일 목록 끝  -->
+                      
                            	
                <!--댓글 추가  -->                    	                           	
              <div class="row">
@@ -44,7 +127,10 @@
         		<div class="panel panel-default">
         			<div class = "panel-heading">
         				<i class="fa fa-comments fa-fw"></i>Reply
-        				<button id="addReplyBtn" class="btn btn-primary btn-xs pull-right">New Reply</button>
+        				
+        				<sec:authorize access="isAuthenticated()"> <!-- 로그인 한 사용자만 가능 -->
+        						<button id="addReplyBtn" class="btn btn-primary btn-xs pull-right">New Reply</button>
+        				</sec:authorize>
         			</div>
       		
         		<!-- /.panel-heading -->
@@ -136,6 +222,94 @@
           
         <script type="text/javascript" src="/resources/js/reply.js"></script>
         
+        <script>
+        
+        $(document).ready(function() {
+        
+        	(function(){
+        		
+               	var bno = '<c:out value="${board.bno}"/>';
+            	
+                
+    	        $.getJSON("/board/getAttachList", {bno:bno} , function(arr){
+    	        	//getJSON ("요청보낼 uri 경로",{함께보낼 파라미터값(json 형태로)},function(콜백함수(컬렉션의 각 요소를 대상으로 실행할 콜백 함수)))
+    				console.log("=============================")
+    	        	
+    			
+    	        	console.log(arr);
+    	        	
+    	        	var str ="";
+    	        	
+    	        	$(arr).each(function(i,attach){
+    	        		
+    	        		//이미지 파일일경우
+    	        		if(attach.fileType){
+    	        			var fileCallPath = encodeURIComponent( attach.uploadPath+ "/s_"+attach.uuid +"_"+attach.fileName);
+
+    	        			 str += "<li data-path='"+attach.uploadPath+"' data-uuid='"+attach.uuid+"' data-filename='"+attach.fileName+"' data-type='"+attach.fileType+"' ><div>";
+    	        	           str += "<img src='/display?fileName="+fileCallPath+"'>";
+    	        	           str += "</div>";
+    	        	           str +"</li>";
+    	        	         }else{
+    	        	             
+    	        	           str += "<li data-path='"+attach.uploadPath+"' data-uuid='"+attach.uuid+"' data-filename='"+attach.fileName+"' data-type='"+attach.fileType+"' ><div>";
+    	        	           str += "<span> "+ attach.fileName+"</span><br/>";
+    	        	           str += "<img src='/resources/img/attach.png'></a>";
+    	        	           str += "</div>";
+    	        	           str +"</li>";
+   
+    	        		}
+
+    	        	});
+    	        	
+    	        	$(".uploadResult ul").html(str);
+    			}); //end getjson
+        		
+    			
+    			
+        	})(); //end function
+        	
+        	/* 첨부파일 목록 클릭시  */
+        	$(".uploadResult").on("click","li",function(e){
+        		
+        		console.log("veiwImage");
+        		
+        		var liObj = $(this);
+        		
+        		
+        		var path = encodeURIComponent(liObj.data("path")+"/" + liObj.data("uuid")+"_" + liObj.data("filename"));
+
+        		
+        		if(liObj.data("type")){
+        			//이미지 타입이라면 이미지 보여주기 
+        			showImage(path.replace(new RegExp(/\\/g),"/"));
+        			
+        		}else{
+        			//다운로드 하기
+        			self.location = "/download?fileName="+path;      			
+        		}
+        	});
+        	function showImage(fileCallPath){
+        		
+        		
+        		alert(fileCallPath);
+        		$(".bigPictureWrapper").css("display","flex").show();
+        		
+        		$(".bigPicture").html("<img src='/display?fileName="+fileCallPath+"'>").animate({width:'100%',height:'100%'},1000);
+        		
+        		
+        	}
+
+       		$(".bigPictureWrapper").on("click", function(e){
+       		    $(".bigPicture").animate({width:'0%', height: '0%'}, 1000);
+       		    setTimeout(function(){
+       		      $('.bigPictureWrapper').hide();
+       		    }, 1000);
+       		  });
+        });
+        
+        </script>
+  
         <script>
         
         	//console.log("===============");
@@ -256,9 +430,21 @@
 				var modalRemoveBtn = $("#modalRemoveBtn");
 				var modalRegisterBtn = $("#modalRegisterBtn");
 				
+				var replyer = null;
+				
+				<sec:authorize access ="isAuthenticated()"> 
+				
+					replyer = '<sec:authentication property="principal.username"/>';
+				
+				</sec:authorize>
+				
+	 			var csrfHeaderName = "${_csrf.headerName}";  //"X-CSRF-TOKEN"
+    			var csrfTokenValue = "${_csrf.token}";		// 
+				
 				$("#addReplyBtn").on("click",function(e){
 					
 					modal.find("input").val("");
+					modal.find("input[name='replyer']").val(replyer);
 					modalInputReplyDate.closest("div").hide(); 
 					// 등록 날짜 안보이게 비활성화 
 					
@@ -271,6 +457,13 @@
 				});
 				
 				
+    			//Ajax spring 시큐리티 헤더 설정
+    			$(document).ajaxSend(function(e,xhr,options){
+    				//ajax 전송시 같이 전송하도록 세팅
+    				xhr.setRequestHeader(csrfHeaderName , csrfTokenValue);
+    			});
+    			
+    			
 				//새로운 댓글 추가 처리
 				
 				modalRegisterBtn.on("click",function(e){
@@ -320,9 +513,26 @@
 
 				
 				//댓글 수정 / 삭제 처리
+		
 				modalModBtn.on("click",function(e){
 					
-					var reply = {rno:modal.data("rno"),reply:modalInputReply.val()};
+					var originalReplyer = modalInputReplyer.val();
+					
+					var reply = {rno:modal.data("rno"),
+								reply:modalInputReply.val(),
+								replyer:originalReplyer};
+					
+					if(!replyer){
+						alert("로그인후 수정이 가능합니다.");
+						modal.modal("hide");
+						return;
+					}
+					
+					if(replyer != originalReplyer){
+						alert("자신이 등록한 댓글만 수정이 가능합니다.");
+						modal.modal("hide");
+						return;
+					}
 					
 					replyService.update(reply,function(result){
 						
@@ -334,11 +544,25 @@
 					
 				});
 				
+				//댓글 삭제버튼
 				modalRemoveBtn.on("click",function(e){
 					
 					var rno = modal.data("rno");
 					
-					replyService.remove(rno,function(result){
+					if(!replyer){
+						alert("로그인후 삭제가 가능합니다.");
+						modal.modal("hide");
+					}
+					
+					var originalReplyer = modalInputReplyer.val();
+					
+					if(replyer != originalReplyer){
+						alert("자신이 등록한 댓글만 삭제가 가능합니다.");
+						modal.modal("hide");
+						return;
+					}
+					
+					replyService.remove(rno,originalReplyer,function(result){
 						
 						alert(result);
 						modal.modal("hide");
