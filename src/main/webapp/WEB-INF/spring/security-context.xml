@@ -12,7 +12,7 @@
 	<!-- <bean id="customPasswordEncoder" class="org.zerock.security.CustomNoOpPasswordEncoder"></bean> -->
 
 	<bean id="bcryptPasswordEncoder"
-		class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
+		class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" /> <!-- 패스워드인코딩  -->
 	
 	<bean id="customUserDetailsService" class="org.zerock.security.CustomUserDetailsService"></bean>
 	
@@ -32,19 +32,23 @@
 
 		<!-- <security:form-login login-page="/customLogin" authentication-success-handler-ref="customLoginSuccess" 
 			/> -->
-
+		<!-- SavedRequestAwareAuthenticationSuccessHandler라는 클래스를 이용하기 위해 다른 핸들러 사용x  -->
+		<!-- 사용자가 원래 보려고 했던 페이지의 정보를 유지해서 로그인 후에 원했던 페이지로 이동하는 방식  -->
 		<security:form-login login-page="/customLogin" />
 
 		<!-- <security:csrf disabled="true"/> -->
 
 		<security:logout logout-url="/customLogout"
 			invalidate-session="true" />
-
-		<security:remember-me
-			data-source-ref="dataSource" token-validity-seconds="604800" />
+			
+			
+			
+		<!--쿠키이름 지정 가능 (영어로 씀)  -->
+		<security:remember-me											 
+			data-source-ref="dataSource" token-validity-seconds="604800"  remember-me-cookie="login-remember"/>
 
 		<security:logout logout-url="/customLogout"
-			invalidate-session="true" delete-cookies="remember-me,JSESSION_ID" />
+			invalidate-session="true" delete-cookies="login-remember,JSESSION_ID" />
 	</security:http>
 	
 	<!-- <security:authentication-manager> <security:authentication-provider> 
@@ -73,9 +77,11 @@
 		</security:authentication-provider> -->
 		
 		<security:authentication-provider user-service-ref="customUserDetailsService">
-			<!-- user 인터페이스 상속받아 객체 반환 -->
-			<security:password-encoder ref="bcryptPasswordEncoder"/>
+			<!-- user클래스의 Detailes 인터페이스 상속받아 객체 반환 -->
+			<!-- 내부적으로 mapper를 사용해서 객체 확인 및 변환  -->
 			
+			<security:password-encoder ref="bcryptPasswordEncoder"/>
+			<!-- 패스워드 인코딩용  -->
 		</security:authentication-provider>
 	</security:authentication-manager>
 

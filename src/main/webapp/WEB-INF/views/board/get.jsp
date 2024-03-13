@@ -458,8 +458,16 @@
 				
 				
     			//Ajax spring 시큐리티 헤더 설정
+    			//function(event,xhr,options) ->필수항목
+
+				//요청이 성공했을 때 실행하는 함수를 나타냅니다.
+				//추가파라미터 :
+				//· event - event object
+				//· xhr - XMLHttpRequest object
+				//· options - AJAX 요청에 사용할 옵션
+
     			$(document).ajaxSend(function(e,xhr,options){
-    				//ajax 전송시 같이 전송하도록 세팅
+    				//ajax 전송시 같이 전송하도록  미리 세팅
     				xhr.setRequestHeader(csrfHeaderName , csrfTokenValue);
     			});
     			

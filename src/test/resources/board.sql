@@ -159,7 +159,7 @@ create table tbl_reply(
  	last_used timestamp not null
  );
  
- 
+ select * from persistent_logins;
  
  
  

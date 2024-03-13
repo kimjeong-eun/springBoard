@@ -148,7 +148,7 @@
 				
 				var inputFile = $("input[name='uploadFile']");
 				
-				var files = inputFile[0].files;
+				var files = inputFile[0].files; //해당태그가 배열로들어옴 파일리스트도 배열로 들어옴
 				
 				for(var i = 0; i<files.length ; i++){
 					if(!checkExtension(files[i].name,files[i].size)){
@@ -162,14 +162,14 @@
 				
 				$.ajax({
 					url:'/uploadAjaxAction',
-					processData:false, //쿼리스트링 방지
-					contentType:false, //기본 타입 방지
+					processData:false, //쿼리스트링 방지 -> 파일형식 보낼 때 설정
+					contentType:false, //기본 타입 방지  -> ''
 					beforeSend: function(xhr){   // 헤더에 csrf 값 추가
 						xhr.setRequestHeader(csrfHeaderName, csrfTokenValue);
 					},
 					data: formData,
 					type:'POST',
-					dataType:'json',
+					dataType:'json', // 서버로부터 어떤 타입의 데이터를 받을 것인가 ? -> result에 영향
 					success: function(result){
 						console.log(result);
 						showUploadResult(result);
@@ -178,7 +178,7 @@
 			});
 			
 			
-			function showUploadResult(uploadResultArr){
+			function showUploadResult(uploadResultArr){ //업로드 리스트가 body에담긴 json데이터
 			    
 			    if(!uploadResultArr || uploadResultArr.length == 0){ return; }
 			    

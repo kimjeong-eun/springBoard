@@ -28,7 +28,7 @@ public class MemberTests {
   private PasswordEncoder pwencoder; //패스워드 인코더 (security-context.xml에 bean으로 등록되어있슴
   
   @Setter(onMethod_ = @Autowired)
-  private DataSource ds;
+  private DataSource ds;  //root-context.xml에 있는dataSource 매핑
   
   @Test
   public void testInsertMember() {
@@ -41,10 +41,10 @@ public class MemberTests {
       PreparedStatement pstmt = null;
       
       try {
-        con = ds.getConnection();
-        pstmt = con.prepareStatement(sql);
+        con = ds.getConnection(); // 커넥션 객체 참조변수에 데이터소스 객체가 커넥션 줌
+        pstmt = con.prepareStatement(sql); 
         
-        pstmt.setString(2, pwencoder.encode("pw" + i));
+        pstmt.setString(2, pwencoder.encode("pw" + i)); //패스워드를 인코딩해서 넣음
         
         if(i <80) {
           
@@ -63,7 +63,7 @@ public class MemberTests {
           
         }
         
-        pstmt.executeUpdate();
+        pstmt.executeUpdate();  //실행
         
       }catch(Exception e) {
         e.printStackTrace();
@@ -94,17 +94,17 @@ public class MemberTests {
         if(i <80) {
           
           pstmt.setString(1, "user"+i);
-          pstmt.setString(2,"ROLE_USER");
+          pstmt.setString(2,"ROLE_USER");  //권한 표현식 
           
         }else if (i <90) {
           
           pstmt.setString(1, "manager"+i);
-          pstmt.setString(2,"ROLE_MEMBER");
+          pstmt.setString(2,"ROLE_MEMBER"); //멤버
           
         }else {
           
           pstmt.setString(1, "admin"+i);
-          pstmt.setString(2,"ROLE_ADMIN");
+          pstmt.setString(2,"ROLE_ADMIN"); //어드민
           
         }
         

@@ -5,8 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class CustomNoOpPasswordEncoder implements PasswordEncoder{
-	
+public class CustomNoOpPasswordEncoder implements PasswordEncoder{ //스프링 시큐리티에서 구현한 인터페이스
 	
 	
 	@Override
